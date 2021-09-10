@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"go-server-test/server/db/models"
 	"net/http"
 )
 
@@ -10,5 +11,6 @@ func HandleRoot(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleFoo(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Hi from foo")
+	id := models.ParseTest(r)
+	fmt.Fprintln(w, id)
 }

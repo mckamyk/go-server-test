@@ -2,8 +2,27 @@ package main
 
 import (
 	"go-server-test/server"
+	"go-server-test/server/db"
+	"log"
+	"sync"
 )
 
 func main() {
-	server.Start()
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	go func() {
+		server.Start()
+		wg.Done()
+	}()
+	go func() {
+		db.Connect()
+		wg.Done()
+	}()
+
+	ctx, cancel := db.Timeout()
+	defer cancel()
+	defer db.Client.Disconnect(ctx)
+	wg.Wait()
+	log.Println("Shutting down...")
 }

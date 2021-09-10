@@ -8,7 +8,10 @@ export default class RootEl extends scope(LitElement) {
 	@state() home = '';
 
 	async firstUpdated() {
-		this.foo = await fetch('/api/foo').then(r => r.text());
+		this.foo = await fetch('/api/foo', {
+			method: 'post',
+			body: JSON.stringify({test: 'foo'}),
+		}).then(r => r.text());
 		this.home = await fetch('/api').then(r => r.text());
 	}
 
