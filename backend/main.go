@@ -20,9 +20,12 @@ func main() {
 		wg.Done()
 	}()
 
-	ctx, cancel := db.Timeout()
-	defer cancel()
-	defer db.Client.Disconnect(ctx)
+	defer func() {
+		ctx, cancel := db.Timeout()
+		defer cancel()
+		db.Client.Disconnect(ctx)
+	}()
+
 	wg.Wait()
 	log.Println("Shutting down...")
 }
