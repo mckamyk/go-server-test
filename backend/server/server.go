@@ -13,10 +13,14 @@ import (
 func Start() {
 	r := mux.NewRouter()
 	r.Host(":8080")
+
+	protected := r.PathPrefix("/api").Subrouter()
+	protected.HandleFunc("", api.HandleRoot)
+	protected.Use(api.Protected)
+
 	loginRouter := r.PathPrefix("/api/login").Subrouter()
 	loginRouter.HandleFunc("/start", api.LoginStart)
 	loginRouter.HandleFunc("/verify", api.LoginVerify)
 
-	r.HandleFunc("/api", api.HandleRoot)
 	log.Fatal(http.ListenAndServe(":8080", handlers.CompressHandler(handlers.LoggingHandler(os.Stdout, r))))
 }

@@ -9,7 +9,7 @@ import (
 	"github.com/golang-jwt/jwt"
 )
 
-var jwtSigner []byte = []byte("This is the key, it should be replaced and set from Enviornment")
+var JwtSigner []byte = []byte("This is the key, it should be replaced and set from Enviornment")
 
 func LoginStart(w http.ResponseWriter, r *http.Request) {
 	var user models.User
@@ -47,11 +47,11 @@ func LoginVerify(w http.ResponseWriter, r *http.Request) {
 	result := body.User.Verify(body.SigHex)
 
 	if result {
-		token, err := jwt.New(jwt.SigningMethodHS256).SignedString(jwtSigner)
+		token, err := jwt.New(jwt.SigningMethodHS256).SignedString(JwtSigner)
 		if err != nil {
 			log.Panicln("Error creating/signing JWT:", err)
 		}
-		cookie := http.Cookie{Name: "auth", Value: token}
+		cookie := http.Cookie{Name: "auth", Value: token, Path: "/"}
 		http.SetCookie(w, &cookie)
 	} else {
 		w.WriteHeader(401)

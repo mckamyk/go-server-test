@@ -56,7 +56,13 @@ func (u *User) Verify(sigXex string) bool {
 		return false
 	}
 
-	return verifySig(u.Address, sigXex, []byte(user.LoginToken))
+	valid := verifySig(u.Address, sigXex, []byte(user.LoginToken))
+
+	if valid {
+		user.LoginToken = ""
+	}
+
+	return valid
 }
 
 func (u *User) MakeLoginToken() {
