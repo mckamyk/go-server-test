@@ -1,0 +1,83 @@
+package models
+
+import (
+	"context"
+	"crypto/rand"
+	"encoding/base64"
+	"fmt"
+	"go-server-test/server/db"
+	"log"
+	"time"
+
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/crypto"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/options"
+)
+
+type User struct {
+	Address    string `json:"address"`
+	LoginToken string `json:"loginToken"`
+}
+
+func (u *User) Save() {
+	users := db.Client.Database("sys").Collection("users")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	opts := options.Update().SetUpsert(true)
+	filter := bson.M{"address": u.Address}
+	update := bson.M{"$set": u}
+	_, err := users.UpdateOne(ctx, filter, update, opts)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+}
+
+func (u *User) Verify(sigXex string) bool {
+	users := db.Client.Database("sys").Collection("users")
+	ctx, cancel := db.Timeout()
+	defer cancel()
+	filter := bson.M{"address": u.Address}
+	var user User
+	err := users.FindOne(ctx, filter).Decode(&user)
+	if err != nil {
+		log.Println("Failed authentication: No User", u.Address)
+		return false
+	}
+
+	return verifySig(u.Address, sigXex, []byte(user.LoginToken))
+}
+
+func (u *User) MakeLoginToken() {
+	token := make([]byte, 12)
+	rand.Read(token)
+	u.LoginToken = base64.StdEncoding.EncodeToString(token)
+}
+
+func makeSig(data []byte) []byte {
+	msg := fmt.Sprintf("\x19Ethereum Signed Message:\n%d%s", len(data), data)
+	return crypto.Keccak256([]byte(msg))
+}
+
+func verifySig(from string, sigHex string, msg []byte) bool {
+	fromAddr := common.HexToAddress(from)
+
+	sig := hexutil.MustDecode(sigHex)
+	if sig[64] != 27 && sig[64] != 28 {
+		log.Println("Failed authentication: Bad Format")
+		return false
+	}
+	sig[64] -= 27
+
+	pubKey, err := crypto.SigToPub(makeSig(msg), sig)
+	if err != nil {
+		log.Println("Failed authentication: Cannot get PubKey from Sig")
+		return false
+	}
+
+	recoveredAddress := crypto.PubkeyToAddress(*pubKey)
+
+	return fromAddr == recoveredAddress
+}

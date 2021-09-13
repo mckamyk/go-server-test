@@ -1,32 +1,21 @@
 import {LitElement, html, css} from 'lit';
 import {customElement, state} from 'lit/decorators.js';
 import {ScopedElementsMixin as scope} from '@open-wc/scoped-elements';
+import {isConnected} from './services/ethHandler';
+import Login from './views/Login';
 
 @customElement('root-element')
 export default class RootEl extends scope(LitElement) {
-	@state() foo = '';
-	@state() home = '';
+	@state() connected = false;
 
-	async firstUpdated() {
-		this.foo = await fetch('/api/foo', {
-			method: 'post',
-			body: JSON.stringify({test: 'foo'}),
-		}).then(r => r.text());
-		this.home = await fetch('/api').then(r => r.text());
+	async updated() {
+		this.connected = await isConnected();
 	}
 
 	render() {
 		return html`
 			<div class="wrapper">
-				<div class="box">
-					<div class="welcome">
-						Welcome!
-					</div>
-					<div class="api">
-						<div>${this.home}</div>
-						<div>${this.foo}</div>
-					</div>
-				</div>
+				<login-el></login-el>
 			</div>
 		`;
 	}
@@ -45,8 +34,11 @@ export default class RootEl extends scope(LitElement) {
 			align-items: center;
 			justify-content: center;
 		}
-		.welcome {
-			font-size: 8rem;
-		}
 	`;
+
+	static get scopedElements() {
+		return {
+			'login-el': Login,
+		};
+	}
 }
