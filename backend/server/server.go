@@ -18,6 +18,5 @@ func Start() {
 	loginRouter.HandleFunc("/verify", api.LoginVerify)
 
 	r.HandleFunc("/api", api.HandleRoot)
-	r.HandleFunc("/api/foo", api.HandleFoo)
 	log.Fatal(http.ListenAndServe(":8080", handlers.CompressHandler(handlers.LoggingHandler(os.Stdout, r))))
 }

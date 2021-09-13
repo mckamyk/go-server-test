@@ -17,8 +17,9 @@ import (
 )
 
 type User struct {
-	Address    string `json:"address"`
-	LoginToken string `json:"loginToken"`
+	Address           string `json:"address"`
+	LoginToken        string `json:"loginToken"`
+	LoginTokenExpires string
 }
 
 func (u *User) Save() {
@@ -47,6 +48,14 @@ func (u *User) Verify(sigXex string) bool {
 		return false
 	}
 
+	expires, err := time.Parse(time.RFC3339, user.LoginTokenExpires)
+	if err != nil {
+		return false
+	}
+	if time.Now().After(expires) {
+		return false
+	}
+
 	return verifySig(u.Address, sigXex, []byte(user.LoginToken))
 }
 
@@ -54,6 +63,14 @@ func (u *User) MakeLoginToken() {
 	token := make([]byte, 12)
 	rand.Read(token)
 	u.LoginToken = base64.StdEncoding.EncodeToString(token)
+	expires := time.Now().Add(time.Minute * 10)
+	expiresText, err := expires.MarshalText()
+	if err != nil {
+		log.Panicln("Cannot Marshal time!", expires, err)
+	}
+
+	u.LoginTokenExpires = string(expiresText)
+
 }
 
 func makeSig(data []byte) []byte {
