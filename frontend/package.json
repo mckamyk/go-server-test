@@ -21,9 +21,11 @@
     "webpack-dev-server": "^4.1.0"
   },
   "dependencies": {
+    "@reduxjs/toolkit": "^1.6.1",
     "eslint": ">=7.20.0",
     "ethers": "^5.4.6",
     "js-cookie": "^3.0.1",
-    "lit": "^2.0.0-rc.4"
+    "lit": "^2.0.0-rc.4",
+    "pwa-helpers": "^0.9.1"
   }
 }

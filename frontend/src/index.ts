@@ -1,13 +1,13 @@
 import {LitElement, html, css} from 'lit';
 import {customElement, state} from 'lit/decorators.js';
 import {ScopedElementsMixin as scope} from '@open-wc/scoped-elements';
-import {isConnected} from './services/ethHandler';
+import Nav from './views/nav';
+import Router from './services/router/router';
 import Cookies from 'js-cookie';
 import Login from './views/Login';
 
 @customElement('root-element')
 export default class RootEl extends scope(LitElement) {
-	@state() connected = false;
 	@state() isLoggedIn: boolean = false;
 	@state() rootTest: string = 'fetching...'
 
@@ -19,25 +19,17 @@ export default class RootEl extends scope(LitElement) {
 		return false;
 	}
 
-	async updated() {
-		this.connected = await isConnected();
-	}
-
 	firstUpdated() {
 		this.isLoggedIn = this.checkLoggedIn();
-		fetch('/api').then(r => r.text()).then(r => {
-			this.rootTest = r;
-		});
 	}
 
 	render() {
 		return html`
 			<div class="wrapper">
-				${this.isLoggedIn ? html`
-					Logged in!
-				` : html`
-					<login-el></login-el>
-				`}
+				<div class="nav">
+					<nav-el></nav-el>
+				</div>
+				<router-el></router-el>
 			</div>
 		`;
 	}
@@ -53,14 +45,18 @@ export default class RootEl extends scope(LitElement) {
 			height: 100vh;
 			background: #3d3d3d;
 			display: flex;
-			align-items: center;
-			justify-content: center;
+		}
+		.nav {
+			width: 15%;
+			height: 100%;
 		}
 	`;
 
 	static get scopedElements() {
 		return {
 			'login-el': Login,
+			'router-el': Router,
+			'nav-el': Nav,
 		};
 	}
 }
