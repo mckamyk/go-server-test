@@ -37,8 +37,7 @@ export const tryConnect = async () => {
 };
 
 export const login = async () => {
-	const resp = fetch('/api/login').then(r => r.text());
-	console.log(resp);
+	fetch('/api/login').then(r => r.text());
 };
 
 tryConnect();

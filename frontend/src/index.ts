@@ -5,6 +5,7 @@ import Nav from './views/nav';
 import Router from './services/router/router';
 import Cookies from 'js-cookie';
 import Login from './views/Login';
+import Header from './views/header';
 
 @customElement('root-element')
 export default class RootEl extends scope(LitElement) {
@@ -26,10 +27,13 @@ export default class RootEl extends scope(LitElement) {
 	render() {
 		return html`
 			<div class="wrapper">
-				<div class="nav">
-					<nav-el></nav-el>
+				<header-el></header-el>
+				<div class="body">
+					<div class="nav">
+						<nav-el></nav-el>
+					</div>
+					<router-el></router-el>
 				</div>
-				<router-el></router-el>
 			</div>
 		`;
 	}
@@ -39,11 +43,17 @@ export default class RootEl extends scope(LitElement) {
 			box-sizing: border-box;
 			font-family: Arial, Helvetica, sans-serif;
 			color: white;
+			font-size: 15px;
 		}
 		.wrapper {
 			width: 100vw;
 			height: 100vh;
+			display: flex;
+			flex-flow: column nowrap;
 			background: #3d3d3d;
+		}
+		.body {
+			flex-grow: 1;
 			display: flex;
 		}
 		.nav {
@@ -57,6 +67,7 @@ export default class RootEl extends scope(LitElement) {
 			'login-el': Login,
 			'router-el': Router,
 			'nav-el': Nav,
+			'header-el': Header,
 		};
 	}
 }

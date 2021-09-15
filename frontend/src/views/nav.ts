@@ -11,8 +11,6 @@ export default class Nav extends LitElement {
 	render() {
 		return html`
       <div class="wrapper">
-        <button @click=${() => this.goTo('foo')}>Foo</button>
-        <button @click=${() => this.goTo('bar')}>Bar</button>
       </div>
     `;
 	}
@@ -20,7 +18,8 @@ export default class Nav extends LitElement {
   static styles = css`
     .wrapper {
       height: 100%;
-      background-color: gray;
+      width: 5rem;
+      box-shadow: 0 1rem 5px black;
     }
     button {
       width: 100%;
