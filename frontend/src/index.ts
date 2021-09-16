@@ -1,6 +1,7 @@
 import {LitElement, html, css} from 'lit';
 import {customElement, state} from 'lit/decorators.js';
 import {ScopedElementsMixin as scope} from '@open-wc/scoped-elements';
+import {colors} from './styles/colors';
 import Nav from './views/nav';
 import Router from './services/router/router';
 import Cookies from 'js-cookie';
@@ -32,13 +33,15 @@ export default class RootEl extends scope(LitElement) {
 					<div class="nav">
 						<nav-el></nav-el>
 					</div>
-					<router-el></router-el>
+					<div class="view">
+						<router-el></router-el>
+					</div>
 				</div>
 			</div>
 		`;
 	}
 
-	static styles = css`
+	static styles = [colors, css`
 		* {
 			box-sizing: border-box;
 			font-family: Arial, Helvetica, sans-serif;
@@ -50,17 +53,19 @@ export default class RootEl extends scope(LitElement) {
 			height: 100vh;
 			display: flex;
 			flex-flow: column nowrap;
-			background: #3d3d3d;
 		}
 		.body {
 			flex-grow: 1;
 			display: flex;
 		}
-		.nav {
-			width: 15%;
-			height: 100%;
+		.view {
+			flex-grow: 1;
+			padding: 1rem;
+			overflow-y: auto;
+			background: var(--bg);
+			box-shadow: inset 0 0 5px black;
 		}
-	`;
+	`];
 
 	static get scopedElements() {
 		return {

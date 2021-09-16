@@ -19,7 +19,7 @@ export default class Nav extends LitElement {
     .wrapper {
       height: 100%;
       width: 5rem;
-      box-shadow: 0 1rem 5px black;
+      background: var(--diag);
     }
     button {
       width: 100%;

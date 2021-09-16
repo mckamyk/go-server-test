@@ -15,10 +15,11 @@ export default class Header extends scope(LitElement) {
 		return html`
 			<div class="wrapper">
 				<span class="left spread">
-					left
+					<span class="title">
+						<span class="first">Go</span> <span class="last">Test</span>
+					</span>
 				</span>
 				<span class="middle spread">
-					middle
 				</span>
 				<span class="right spread">
 					<button-el @click=${this.login} class="login">Login with Metamask</button-el>
@@ -32,7 +33,7 @@ export default class Header extends scope(LitElement) {
 		.wrapper {
 			position: relative;
 			height: 3rem;
-			box-shadow: 5rem 0 5px black;
+			background: var(--diag);
 		}
 		.wrapper > * {
 			position: absolute;
@@ -58,6 +59,16 @@ export default class Header extends scope(LitElement) {
 		}
 		.right > *:not(:last-child) {
 			margin-right: 1rem;
+		}
+		.first {
+			font-size: 2rem;
+			text-shadow: 0 0 5px var(--accent);
+			color: var(--accent);
+		}
+		.last {
+			font-size: 2rem;
+			text-shadow: 0 0 2px var(--accent2);
+			color: var(--accent2);
 		}
 	`;
 

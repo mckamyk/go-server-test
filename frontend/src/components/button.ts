@@ -29,10 +29,16 @@ export default class Button extends LitElement {
       justify-content: center;
       padding: 0 1rem;
 
+      box-shadow: 0 0 0 transparent;
       background: var(--accent);
+
+      transition: box-shadow 300ms ease;
     }
     .wrapper > * {
       z-index: 1;
+    }
+    .wrapper:hover {
+      box-shadow: 0 0 5px var(--accent);
     }
     .wrapper::after {
       position: absolute;
