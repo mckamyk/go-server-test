@@ -1,15 +1,9 @@
 import {router, registerRoute, routeTo} from './routerStore';
 
 router(registerRoute({
-	name: 'foo',
-	path: '/foo',
-	loader: () => import('../../views/foo'),
+	name: 'balances',
+	path: 'foo',
+	loader: () => import('../../views/balances/balances'),
 }));
 
-router(registerRoute({
-	name: 'bar',
-	path: '/bar',
-	loader: () => import('../../views/bar'),
-}));
-
-router(routeTo('foo'));
+router(routeTo('balances'));

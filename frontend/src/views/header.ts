@@ -62,7 +62,7 @@ export default class Header extends scope(LitElement) {
 		}
 		.first {
 			font-size: 2rem;
-			text-shadow: 0 0 5px var(--accent);
+			text-shadow: 0 0 2px var(--accent);
 			color: var(--accent);
 		}
 		.last {
