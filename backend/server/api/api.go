@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/golang-jwt/jwt"
@@ -20,6 +21,8 @@ func Protected(next http.Handler) http.Handler {
 				})
 				if err != nil {
 					w.WriteHeader(http.StatusUnauthorized)
+					log.Println("Failed Auth: Error parsing/validating token")
+					log.Println(err)
 					return
 				}
 
@@ -27,11 +30,13 @@ func Protected(next http.Handler) http.Handler {
 					next.ServeHTTP(w, r)
 				} else {
 					w.WriteHeader(http.StatusUnauthorized)
+					log.Println("Failed Auth: Token not valid.")
 				}
 			}
 		}
 		if !found {
 			w.WriteHeader(http.StatusUnauthorized)
+			log.Println("Failed Auth: No Token.")
 		}
 	})
 

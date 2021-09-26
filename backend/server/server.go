@@ -2,6 +2,7 @@ package server
 
 import (
 	"go-server-test/server/api"
+	"go-server-test/server/eth"
 	"log"
 	"net/http"
 	"os"
@@ -17,6 +18,10 @@ func Start() {
 	protected := r.PathPrefix("/api").Subrouter()
 	protected.HandleFunc("", api.HandleRoot)
 	protected.Use(api.Protected)
+
+	ethRouter := r.PathPrefix("/api/eth").Subrouter()
+	ethRouter.Use(api.Protected)
+	eth.SetupRoutes(ethRouter)
 
 	loginRouter := r.PathPrefix("/api/login").Subrouter()
 	loginRouter.HandleFunc("/start", api.LoginStart)

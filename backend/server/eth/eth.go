@@ -9,6 +9,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/gorilla/mux"
 )
 
 var Client *ethclient.Client
@@ -16,9 +17,10 @@ var Client *ethclient.Client
 func Connect() {
 	ctx, cancel := db.Timeout()
 	defer cancel()
-	clt, err := ethclient.DialContext(ctx, "http://127.0.0.1:8545")
+	clt, err := ethclient.DialContext(ctx, "/home/mac/.ethereum/geth.ipc")
 	if err != nil {
-		log.Panicln(err)
+		log.Println(err)
+		return
 	}
 
 	log.Println("Eth Node Connected")
@@ -41,7 +43,19 @@ func GetBalances(w http.ResponseWriter, r *http.Request) {
 	var balReq BalancesRequest
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&balReq); err != nil {
-		log.Panicln(err)
+		log.Println(err)
+		w.WriteHeader(400)
+		return
 	}
+	bals, err := Balances(balReq.Address, uint64(balReq.Delta), 100)
+	if err != nil {
+		w.WriteHeader(500)
+		return
+	}
+	encoder := json.NewEncoder(w)
+	encoder.Encode(bals)
+}
 
+func SetupRoutes(r *mux.Router) {
+	r.HandleFunc("/balances", GetBalances).Methods("POST")
 }

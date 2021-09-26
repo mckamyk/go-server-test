@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+	  "start": "webpack s"
+  },
   "devDependencies": {
     "@open-wc/scoped-elements": "^2.0.0-next.5",
     "@types/js-cookie": "^2.2.7",
