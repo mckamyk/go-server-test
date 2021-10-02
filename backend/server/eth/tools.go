@@ -2,81 +2,58 @@ package eth
 
 import (
 	"context"
-	"go-server-test/server/db"
+	"errors"
 	"log"
 	"math/big"
+	"time"
 
 	"github.com/ethereum/go-ethereum/common"
+
+	erc20 "go-server-test/contracts/structs"
 )
 
-type BalanceAtBlock struct {
-	Block   *big.Int `json:"block"`
-	Balance *big.Int `json:"balance"`
-}
-
-func DeltaToBlock(delta uint64) (*big.Int, *big.Int, error) {
-	ctx, cancel := db.Timeout()
+func GetBalance(address common.Address) *big.Int {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
-	currentBlock, err := Client.BlockNumber(ctx)
-	log.Println(currentBlock)
+	balace, err := Client.BalanceAt(ctx, address, nil)
 	if err != nil {
-		log.Println(err)
-		return nil, nil, err
+		log.Println("Error getting balance:", err)
 	}
-
-	return new(big.Int).SetUint64(currentBlock - delta*13), new(big.Int).SetUint64(currentBlock), nil
+	return balace
 }
 
-func Balances(address common.Address, delta uint64, resolution uint64) ([]*BalanceAtBlock, error) {
-	startBlock, endBlock, err := DeltaToBlock(delta)
+func GetTokenBalance(address common.Address, token *Token) (*TokenBalance, error) {
+	if token.ChainId != 1 {
+		log.Printf("Unsupported Chain ID %d for %s at %s\n", token.ChainId, token.Name, token.Address)
+		return nil, errors.New("unsupported chain id")
+	}
+
+	ctr, err := erc20.NewERC20(token.Address, Client)
 	if err != nil {
-		log.Println("Error getting starting and ending block: ", err)
+		log.Println("Error loading ERC20:", err)
 		return nil, err
 	}
-	blockSet := blockSet(startBlock, endBlock, resolution)
-	bals, err := BalanceHistory(address, blockSet)
+
+	bal, err := ctr.BalanceOf(nil, address)
 	if err != nil {
-		log.Println("Error getting balance history", err)
+		log.Printf("Error getting ERC20 balance of %s at %s: %s", token.Name, token.Address, err)
 		return nil, err
 	}
-	return bals, nil
+
+	tokenBalance := TokenBalance{*token, bal}
+
+	return &tokenBalance, nil
 }
 
-func BalanceHistory(address common.Address, blockSet []*big.Int) ([]*BalanceAtBlock, error) {
-	bals := make([]*BalanceAtBlock, 0, len(blockSet))
-
-	for _, block := range blockSet {
-		ctx := context.Background()
-		bal, err := Client.BalanceAt(ctx, address, block)
+func GetAllTokenBalances(address common.Address) []*TokenBalance {
+	var bals []*TokenBalance
+	for _, e := range *Tokens {
+		bal, err := GetTokenBalance(address, &e)
 		if err != nil {
-			log.Println(err)
-		} else {
-			blockBal := BalanceAtBlock{block, bal}
-			bals = append(bals, &blockBal)
+			continue
 		}
-	}
-	return bals, nil
-}
-
-func blockSet(startBlock *big.Int, endBlock *big.Int, resolution uint64) []*big.Int {
-	blocks := make([]*big.Int, 0, resolution)
-	res := new(big.Int).SetUint64(resolution)
-	one := new(big.Int).SetInt64(1)
-
-	if new(big.Int).Sub(endBlock, startBlock).Cmp(res) < 0 {
-		for x := *startBlock; x.Cmp(endBlock) >= 0; x.Add(&x, one) {
-			blocks = append(blocks, &x)
-		}
-		return blocks
+		bals = append(bals, bal)
 	}
 
-	difference := new(big.Int).Sub(endBlock, startBlock)
-	step := new(big.Int).Div(difference, res)
-
-	for i := new(big.Int); i.Cmp(res) < 0; i.Add(i, one) {
-		delta := new(big.Int).Mul(i, step)
-		block := new(big.Int).Add(startBlock, delta)
-		blocks = append(blocks, block)
-	}
-	return blocks
+	return bals
 }

@@ -1,17 +1,21 @@
 import {LitElement, html, css} from 'lit';
 import {state} from 'lit/decorators.js';
 import {ScopedElementsMixin as scope} from '@open-wc/scoped-elements';
-import {getBalances} from '../../services/api/balance';
+import {getBalance, getTokenBalances} from '../../services/api/balance';
+import {ethers} from 'ethers';
 import Card from '../../components/card';
 
 export default class Balances extends scope(LitElement) {
 	@state() resp: string = '';
+	@state() balances: string = '';
 
 	firstUpdated() {
-		const delta = Math.floor(60 * 60 * 24 * 1 / 13);
 		setTimeout(() => {
-			getBalances(delta).then(r => {
-				this.resp = r;
+			getBalance().then(r => {
+				this.resp = ethers.utils.formatEther(r);
+			});
+			getTokenBalances().then(r => {
+				this.balances = JSON.stringify(r, undefined, 2);
 			});
 		}, 1000);
 	}
@@ -21,6 +25,7 @@ export default class Balances extends scope(LitElement) {
 			<card-el header footer>
 				<div slot="header">Header</div>
 				<pre>${this.resp}</pre>
+				<pre>${this.balances}</pre>
 				<div slot="footer">footer</div>
 			</card-el>
 		`;

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"go-server-test/server/db"
 	"log"
-	"math/big"
 	"net/http"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -17,7 +16,7 @@ var Client *ethclient.Client
 func Connect() {
 	ctx, cancel := db.Timeout()
 	defer cancel()
-	clt, err := ethclient.DialContext(ctx, "/home/mac/.ethereum/geth.ipc")
+	clt, err := ethclient.DialContext(ctx, "wss://mainnet.infura.io/ws/v3/7771eec4d31147a78b9c67a3ae6e32c8")
 	if err != nil {
 		log.Println(err)
 		return
@@ -30,16 +29,9 @@ func Connect() {
 
 type BalancesRequest struct {
 	Address common.Address `json:"address"`
-	Delta   uint           `json:"delta"`
 }
 
-type BlockBalance struct {
-	Address common.Address `json:"address"`
-	Block   *big.Int       `json:"block"`
-	Balance *big.Int       `json:"balance"`
-}
-
-func GetBalances(w http.ResponseWriter, r *http.Request) {
+func GetBalanceRoute(w http.ResponseWriter, r *http.Request) {
 	var balReq BalancesRequest
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&balReq); err != nil {
@@ -47,15 +39,26 @@ func GetBalances(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(400)
 		return
 	}
-	bals, err := Balances(balReq.Address, uint64(balReq.Delta), 100)
-	if err != nil {
-		w.WriteHeader(500)
+	bal := GetBalance(balReq.Address)
+	encoder := json.NewEncoder(w)
+	encoder.Encode(bal)
+}
+
+func GetAllTokenBalancesRoute(w http.ResponseWriter, r *http.Request) {
+	var balReq BalancesRequest
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&balReq); err != nil {
+		log.Println(err)
+		w.WriteHeader(400)
 		return
 	}
+	bals := GetAllTokenBalances(balReq.Address)
 	encoder := json.NewEncoder(w)
 	encoder.Encode(bals)
 }
 
 func SetupRoutes(r *mux.Router) {
-	r.HandleFunc("/balances", GetBalances).Methods("POST")
+	GetTokenList()
+	r.HandleFunc("/balances", GetBalanceRoute).Methods("POST")
+	r.HandleFunc("/balances/tokens", GetAllTokenBalancesRoute).Methods("POST")
 }
