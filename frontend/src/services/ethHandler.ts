@@ -1,4 +1,6 @@
 import {ethers} from 'ethers';
+import {checkAuth} from './auth';
+import {dispatch, setAccount} from './redux/accountSlice';
 
 declare const window: Window & typeof globalThis & {
   ethereum: any;
@@ -22,6 +24,9 @@ const setupAccounts = (accounts: string[]) => {
 	if (accounts.length) {
 		provider = provider || new ethers.providers.Web3Provider(window.ethereum);
 		signer = signer || provider.getSigner();
+		dispatch(setAccount(accounts[0]));
+	} else {
+		dispatch(setAccount(undefined));
 	}
 };
 
@@ -35,6 +40,11 @@ export const tryConnect = async () => {
 		console.log('Ethereum not connected.');
 	}
 };
+
+window.ethereum.on('accountsChanged', (accounts: string[]) => {
+	setupAccounts(accounts);
+	checkAuth();
+});
 
 export const login = async () => {
 	fetch('/api/login').then(r => r.text());

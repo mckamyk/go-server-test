@@ -1,5 +1,5 @@
-import {signer} from '../ethHandler';
 import {BigNumber} from 'ethers';
+import {store} from '../redux/store';
 
 interface BalancesRequest {
   address: string;
@@ -27,7 +27,7 @@ export const getBalance = async (): Promise<BigNumber> => {
 	const balAsString = await fetch('/api/eth/balances', {
 		method: 'post',
 		body: JSON.stringify({
-			address: await signer.getAddress(),
+			address: store.getState().accountReducer.address,
 		} as BalancesRequest),
 	}).then(r => r.text());
 
@@ -38,7 +38,7 @@ export const getTokenBalances = async (): Promise<TokenBalance[]> => {
 	const tokenBalances = await fetch('/api/eth/balances/tokens', {
 		method: 'post',
 		body: JSON.stringify({
-			address: await signer.getAddress(),
+			address: store.getState().accountReducer.address,
 		} as BalancesRequest),
 	}).then(r => r.json()) as TokenBalanceDirty[];
 

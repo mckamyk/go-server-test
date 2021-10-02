@@ -1,31 +1,33 @@
 import {LitElement, html, css} from 'lit';
 import {customElement, state} from 'lit/decorators.js';
 import {ScopedElementsMixin as scope} from '@open-wc/scoped-elements';
+import {connect} from 'pwa-helpers';
+import {store, RootState} from './services/redux/store';
 import {colors} from './styles/colors';
 import Nav from './views/nav';
 import Router from './services/router/router';
-import Cookies from 'js-cookie';
 import Login from './views/Login';
 import Header from './views/header';
 
 @customElement('root-element')
-export default class RootEl extends scope(LitElement) {
-	@state() isLoggedIn: boolean = false;
-	@state() rootTest: string = 'fetching...'
+export default class RootEl extends connect(store)(scope(LitElement)) {
+	@state() private authenticated: boolean = false;
 
-	checkLoggedIn() {
-		if (Cookies.get('auth')) {
-			return true;
+	stateChanged(state: RootState) {
+		if (this.authenticated !== state.accountReducer.authenticated) {
+			this.authenticated = state.accountReducer.authenticated;
 		}
-
-		return false;
-	}
-
-	firstUpdated() {
-		this.isLoggedIn = this.checkLoggedIn();
 	}
 
 	render() {
+		if (!this.authenticated) {
+			return html`
+				<div class="loginWrapper">
+					<login-el class="login"></login-el>
+				</div>
+			`;
+		}
+
 		return html`
 			<div class="wrapper">
 				<header-el></header-el>
@@ -55,6 +57,18 @@ export default class RootEl extends scope(LitElement) {
 			height: 100vh;
 			display: flex;
 			flex-flow: column nowrap;
+		}
+		.loginWrapper {
+			display: flex;
+			height: 100vh;
+			width: 100vw;
+			background-color: var(--bg);
+			align-items: center;
+			justify-content: center;
+			font-size: 3rem;
+		}
+		.login {
+			font-size: 2rem;
 		}
 		.body {
 			flex-grow: 1;
