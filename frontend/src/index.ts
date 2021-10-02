@@ -34,7 +34,9 @@ export default class RootEl extends scope(LitElement) {
 						<nav-el></nav-el>
 					</div>
 					<div class="view">
-						<router-el></router-el>
+						<div class="viewWrapper">
+							<router-el></router-el>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -59,11 +61,36 @@ export default class RootEl extends scope(LitElement) {
 			display: flex;
 		}
 		.view {
+			height: calc(100vh - 3rem);
 			flex-grow: 1;
-			padding: 1rem;
-			overflow-y: auto;
 			background: var(--bg);
-			box-shadow: inset 0 0 5px black;
+			position: relative;
+		}
+		.view::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			width: 100%;
+			height: 5px;
+			background: linear-gradient(black, rgba(0, 0, 0, 0));
+		}
+		.nav {
+			position: relative;
+		}
+		.nav::after {
+			content: '';
+			position: absolute;
+			height: calc(100vh - 3rem);
+			width: 5px;
+			top: 0;
+			right: -5px;
+			z-index: 1;
+			background: linear-gradient(to right, black, rgba(0, 0, 0, 0));
+		}
+		.viewWrapper {
+			height: inherit;
+			overflow-y: auto;
+			padding: 1rem;
 		}
 	`];
 

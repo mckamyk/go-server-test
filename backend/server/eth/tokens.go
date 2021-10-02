@@ -64,7 +64,7 @@ func GetTokenList() *[]Token {
 	var pruned []Token
 	for _, token := range tokenList.Tokens {
 		if token.ChainId != 1 {
-			log.Printf("Pruning unsupprted Chain Id %d for %s at %s", token.ChainId, token.Name, token.Address)
+			log.Printf("Pruning unsupported Chain Id %d for %s at %s", token.ChainId, token.Name, token.Address)
 			continue
 		}
 		pruned = append(pruned, token)
