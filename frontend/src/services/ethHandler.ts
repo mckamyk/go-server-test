@@ -9,7 +9,7 @@ declare const window: Window & typeof globalThis & {
 export let provider: ethers.providers.Web3Provider;
 export let signer: ethers.providers.JsonRpcSigner;
 
-export const isConnected = async ():Promise<boolean> => {
+export const isConnected = async (): Promise<boolean> => {
 	const accounts = await window.ethereum.request({method: 'eth_accounts'}) as string[];
 	return accounts.length > 0;
 };

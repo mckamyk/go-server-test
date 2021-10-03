@@ -1,10 +1,6 @@
 import {BigNumber} from 'ethers';
 import {store} from '../redux/store';
-
-interface BalancesRequest {
-  address: string;
-  delta: number;
-}
+import {safeFetch} from './safeFetch';
 
 export interface Token {
 	chainId: number;
@@ -24,23 +20,15 @@ export interface TokenBalance extends Token {
 }
 
 export const getBalance = async (): Promise<BigNumber> => {
-	const balAsString = await fetch('/api/eth/balances', {
-		method: 'post',
-		body: JSON.stringify({
-			address: store.getState().accountReducer.address,
-		} as BalancesRequest),
-	}).then(r => r.text());
+	const balAsString = await safeFetch('/api/eth/balances', 'post', {address: store.getState().accountReducer.address})
+		.then(r => r.text());
 
 	return BigNumber.from(balAsString.trim());
 };
 
 export const getTokenBalances = async (): Promise<TokenBalance[]> => {
-	const tokenBalances = await fetch('/api/eth/balances/tokens', {
-		method: 'post',
-		body: JSON.stringify({
-			address: store.getState().accountReducer.address,
-		} as BalancesRequest),
-	}).then(r => r.json()) as TokenBalanceDirty[];
+	const tokenBalances = await safeFetch('/api/eth/balances/tokens', 'post', {address: store.getState().accountReducer.address})
+		.then(r => r.json()) as TokenBalance[];
 
 	return tokenBalances.map(tokenBal => {
 		const balance = BigNumber.from(tokenBal.balance);

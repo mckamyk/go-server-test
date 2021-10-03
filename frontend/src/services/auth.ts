@@ -1,6 +1,8 @@
 import Cookies from 'js-cookie';
+import {safeFetch} from './api/safeFetch';
 import {signer} from './ethHandler';
 import {dispatch, setAuthenticated} from './redux/accountSlice';
+import {store} from './redux/store';
 
 interface LoginStartResponse {
   address: string;
@@ -33,12 +35,7 @@ export const loginStart = async () => {
 };
 
 export const checkAuth = async () => {
-	try {
-		await fetch('/api/check');
-		dispatch(setAuthenticated(true));
-	} catch {
-		dispatch(setAuthenticated(true));
-	}
+	safeFetch('/api/login/check', 'post', {address: store.getState().accountReducer.address});
 };
 
 export const logOut = () => {

@@ -1,4 +1,5 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
+import Cookies from 'js-cookie';
 
 interface AccountState {
   address?: string;
@@ -21,6 +22,9 @@ const accountSlice = createSlice({
 		},
 		setAuthenticated: (state, action: PayloadAction<AccountState['authenticated']>) => {
 			state.authenticated = action.payload;
+			if (!action.payload) {
+				Cookies.remove('auth');
+			}
 		},
 	},
 });

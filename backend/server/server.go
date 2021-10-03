@@ -15,12 +15,7 @@ func Start() {
 	r := mux.NewRouter()
 	r.Host(":8080")
 
-	authCheck := r.PathPrefix("/api/check").Subrouter()
-	authCheck.Use(api.Protected)
-	authCheck.HandleFunc("", emptyHandler)
-
 	protected := r.PathPrefix("/api").Subrouter()
-	protected.HandleFunc("", api.HandleRoot)
 	protected.Use(api.Protected)
 
 	ethRouter := r.PathPrefix("/api/eth").Subrouter()
@@ -28,11 +23,7 @@ func Start() {
 	eth.SetupRoutes(ethRouter)
 
 	loginRouter := r.PathPrefix("/api/login").Subrouter()
-	loginRouter.HandleFunc("/start", api.LoginStart)
-	loginRouter.HandleFunc("/verify", api.LoginVerify)
+	api.SetupLoginRoutes(loginRouter)
 
 	log.Fatal(http.ListenAndServe(":8080", handlers.CompressHandler(handlers.LoggingHandler(os.Stdout, r))))
-}
-
-func emptyHandler(w http.ResponseWriter, r *http.Request) {
 }

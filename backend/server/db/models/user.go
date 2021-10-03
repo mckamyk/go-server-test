@@ -17,6 +17,7 @@ import (
 )
 
 type User struct {
+	Id                string `json:"id"`
 	Address           string `json:"address"`
 	LoginToken        string `json:"loginToken"`
 	LoginTokenExpires string
@@ -36,7 +37,7 @@ func (u *User) Save() {
 	}
 }
 
-func (u *User) Verify(sigXex string) bool {
+func (u *User) Verify(sigXex string) (bool, *User) {
 	users := db.Client.Database("sys").Collection("users")
 	ctx, cancel := db.Timeout()
 	defer cancel()
@@ -45,24 +46,25 @@ func (u *User) Verify(sigXex string) bool {
 	err := users.FindOne(ctx, filter).Decode(&user)
 	if err != nil {
 		log.Println("Failed authentication: No User", u.Address)
-		return false
+		return false, nil
 	}
 
 	expires, err := time.Parse(time.RFC3339, user.LoginTokenExpires)
 	if err != nil {
-		return false
+		return false, nil
 	}
 	if time.Now().After(expires) {
-		return false
+		return false, nil
 	}
 
 	valid := verifySig(u.Address, sigXex, []byte(user.LoginToken))
 
 	if valid {
 		user.LoginToken = ""
+		user.Save()
 	}
 
-	return valid
+	return valid, &user
 }
 
 func (u *User) MakeLoginToken() {
