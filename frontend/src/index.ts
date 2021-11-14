@@ -4,10 +4,12 @@ import {ScopedElementsMixin as scope} from '@open-wc/scoped-elements';
 import {connect} from 'pwa-helpers';
 import {store, RootState} from './services/redux/store';
 import {colors} from './styles/colors';
+import {dispatch, setAuthenticated} from './services/redux/accountSlice';
 import Nav from './views/nav';
 import Router from './services/router/router';
 import Login from './views/Login';
 import Header from './views/header';
+import {checkAuth} from './services/auth';
 
 @customElement('root-element')
 export default class RootEl extends connect(store)(scope(LitElement)) {
@@ -17,6 +19,15 @@ export default class RootEl extends connect(store)(scope(LitElement)) {
 		if (this.authenticated !== state.accountReducer.authenticated) {
 			this.authenticated = state.accountReducer.authenticated;
 		}
+	}
+
+	connectedCallback() {
+		super.connectedCallback();
+		checkAuth().then(() => {
+			dispatch(setAuthenticated(true));
+		}).catch(() => {
+			dispatch(setAuthenticated(false));
+		});
 	}
 
 	render() {

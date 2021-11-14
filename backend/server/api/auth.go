@@ -1,7 +1,6 @@
 package api
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"go-server-test/server/db/models"
@@ -14,7 +13,7 @@ import (
 
 func SetupLoginRoutes(r *mux.Router) {
 	r.HandleFunc("/start", LoginStart).Methods("POST")
-	r.HandleFunc("/verfiy", LoginVerify).Methods("POST")
+	r.HandleFunc("/verify", LoginVerify).Methods("POST")
 	r.HandleFunc("/check", LoginCheck).Methods("POST")
 }
 
@@ -43,15 +42,6 @@ type LoginVerifyStruct struct {
 	SigHex string      `json:"sigHex"`
 }
 
-type UserClaims struct {
-	Id      string
-	Address string
-}
-
-func (c UserClaims) Valid() error {
-	return nil
-}
-
 func LoginVerify(w http.ResponseWriter, r *http.Request) {
 	var body LoginVerifyStruct
 	decoder := json.NewDecoder(r.Body)
@@ -62,12 +52,10 @@ func LoginVerify(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	success, user := body.User.Verify(body.SigHex)
+	success, _ := body.User.Verify(body.SigHex)
 
 	if success {
-		claims := UserClaims{Id: user.Id, Address: user.Address}
-
-		token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(JwtSigner)
+		token, err := jwt.New(jwt.SigningMethodHS256).SignedString(JwtSigner)
 		if err != nil {
 			log.Panicln("Error creating/signing JWT:", err)
 		}
@@ -96,14 +84,15 @@ func LoginCheck(w http.ResponseWriter, r *http.Request) {
 		reject(w)
 	}
 
-	token, claims, err := parseJwt(jwtString)
+	token, err := parseJwt(jwtString)
 
 	if err != nil {
+		log.Println(err)
 		reject(w)
 		return
 	}
 
-	if !token.Valid || claims.Address != body.Address {
+	if !token.Valid {
 		reject(w)
 		return
 	}
@@ -128,17 +117,16 @@ func (c UserContextKey) String() string {
 	return string(c)
 }
 
-func parseJwt(jwtString string) (*jwt.Token, *UserClaims, error) {
-	var claims UserClaims
-	token, err := jwt.ParseWithClaims(jwtString, claims, func(token *jwt.Token) (interface{}, error) {
+func parseJwt(jwtString string) (*jwt.Token, error) {
+	token, err := jwt.Parse(jwtString, func(token *jwt.Token) (interface{}, error) {
 		return JwtSigner, nil
 	})
 
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return token, &claims, nil
+	return token, nil
 }
 
 func Protected(next http.Handler) http.Handler {
@@ -151,7 +139,7 @@ func Protected(next http.Handler) http.Handler {
 			reject(w)
 		}
 
-		token, claims, err := parseJwt(jwtString)
+		token, err := parseJwt(jwtString)
 
 		if err != nil {
 			reject(w)
@@ -161,8 +149,6 @@ func Protected(next http.Handler) http.Handler {
 		}
 
 		if token.Valid {
-			ctx := context.WithValue(r.Context(), UserContextKey("user"), claims)
-			r = r.Clone(ctx)
 			next.ServeHTTP(w, r)
 		} else {
 			w.WriteHeader(http.StatusUnauthorized)

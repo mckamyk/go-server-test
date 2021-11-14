@@ -15,6 +15,9 @@ export const loginStart = async () => {
 	const {loginToken} = await fetch('/api/login/start', {
 		method: 'post',
 		body: JSON.stringify({address}),
+		headers: {
+			'Content-Type': 'application/json',
+		},
 	}).then(r => r.json()) as LoginStartResponse;
 
 	const signature = await signer.signMessage(loginToken);
@@ -26,6 +29,9 @@ export const loginStart = async () => {
 				user: {address},
 				sigHex: signature,
 			}),
+			headers: {
+				'Content-Type': 'application/json',
+			},
 		}).then(r => r.text());
 
 		checkAuth();

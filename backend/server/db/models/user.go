@@ -109,11 +109,21 @@ func (u *User) VerifySig(sigHex string, msg []byte) bool {
 	return fromAddr == recoveredAddress
 }
 
-func (u *User) WatchAccount(address string, label string) *Account {
+func (u *User) WatchAccount(address string, label string) interface{} {
 	account := Account{
 		Address: address,
 		Label:   label,
 	}
 
-	return &account
+	accounts := db.Client.Database("sys").Collection("accounts")
+	ctx, cancel := db.Timeout()
+	defer cancel()
+
+	insertResult, err := accounts.InsertOne(ctx, account)
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+
+	return insertResult.InsertedID
 }
