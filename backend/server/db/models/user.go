@@ -17,8 +17,10 @@ import (
 )
 
 type User struct {
-	Id                string `json:"id"`
-	Address           string `json:"address"`
+	Id              string    `json:"id"`
+	Address         string    `json:"address"`
+	WatchedAccounts []Account `json:"watchedAccounts"`
+
 	LoginToken        string `json:"loginToken"`
 	LoginTokenExpires string
 }
@@ -37,7 +39,7 @@ func (u *User) Save() {
 	}
 }
 
-func (u *User) Verify(sigXex string) (bool, *User) {
+func (u *User) Verify(sigHex string) (bool, *User) {
 	users := db.Client.Database("sys").Collection("users")
 	ctx, cancel := db.Timeout()
 	defer cancel()
@@ -57,7 +59,7 @@ func (u *User) Verify(sigXex string) (bool, *User) {
 		return false, nil
 	}
 
-	valid := verifySig(u.Address, sigXex, []byte(user.LoginToken))
+	valid := u.VerifySig(sigHex, []byte(user.LoginToken))
 
 	if valid {
 		user.LoginToken = ""
@@ -86,8 +88,8 @@ func makeSig(data []byte) []byte {
 	return crypto.Keccak256([]byte(msg))
 }
 
-func verifySig(from string, sigHex string, msg []byte) bool {
-	fromAddr := common.HexToAddress(from)
+func (u *User) VerifySig(sigHex string, msg []byte) bool {
+	fromAddr := common.HexToAddress(u.Address)
 
 	sig := hexutil.MustDecode(sigHex)
 	if sig[64] != 27 && sig[64] != 28 {
@@ -105,4 +107,13 @@ func verifySig(from string, sigHex string, msg []byte) bool {
 	recoveredAddress := crypto.PubkeyToAddress(*pubKey)
 
 	return fromAddr == recoveredAddress
+}
+
+func (u *User) WatchAccount(address string, label string) *Account {
+	account := Account{
+		Address: address,
+		Label:   label,
+	}
+
+	return &account
 }
