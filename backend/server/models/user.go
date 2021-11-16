@@ -5,7 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
-	"go-server-test/server/db"
+	"go-server-test/server/services/db"
 	"log"
 	"time"
 

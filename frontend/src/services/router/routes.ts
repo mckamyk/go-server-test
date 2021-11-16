@@ -13,9 +13,9 @@ export const routes: Route[] = [
 		loader: () => import('../../views/balances/balances'),
 	},
 	{
-		name: 'Providers',
-		path: 'providers',
-		loader: () => import('../../views/Providers/providers'),
+		name: 'Chains',
+		path: 'chains',
+		loader: () => import('../../views/Chains/chains'),
 	},
 ];
 

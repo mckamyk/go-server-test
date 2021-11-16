@@ -2,8 +2,8 @@ package main
 
 import (
 	"go-server-test/server"
-	"go-server-test/server/db"
-	"go-server-test/server/eth"
+	"go-server-test/server/services/db"
+	"go-server-test/server/services/eth"
 )
 
 func main() {

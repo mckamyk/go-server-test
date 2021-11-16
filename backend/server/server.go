@@ -1,8 +1,8 @@
 package server
 
 import (
-	"go-server-test/server/api"
-	"go-server-test/server/eth"
+	"go-server-test/server/services/eth"
+	"go-server-test/server/views"
 	"log"
 	"net/http"
 	"os"
@@ -16,14 +16,18 @@ func Start() {
 	r.Host(":8080")
 
 	protected := r.PathPrefix("/api").Subrouter()
-	protected.Use(api.Protected)
+	protected.Use(views.Protected)
 
 	ethRouter := r.PathPrefix("/api/eth").Subrouter()
-	ethRouter.Use(api.Protected)
+	ethRouter.Use(views.Protected)
 	eth.SetupRoutes(ethRouter)
 
+	chainsRouter := r.PathPrefix("/api/chains").Subrouter()
+	chainsRouter.Use(views.Protected)
+	views.SetupChainsRoutes(chainsRouter)
+
 	loginRouter := r.PathPrefix("/api/login").Subrouter()
-	api.SetupLoginRoutes(loginRouter)
+	views.SetupLoginRoutes(loginRouter)
 
 	log.Fatal(http.ListenAndServe(":8080", handlers.CompressHandler(handlers.LoggingHandler(os.Stdout, r))))
 }

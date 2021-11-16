@@ -2,7 +2,7 @@ package eth
 
 import (
 	"encoding/json"
-	"go-server-test/server/db"
+	"go-server-test/server/services/db"
 	"log"
 	"net/http"
 

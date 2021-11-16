@@ -1,9 +1,9 @@
-package api
+package views
 
 import (
 	"encoding/json"
 	"errors"
-	"go-server-test/server/db/models"
+	"go-server-test/server/models"
 	"log"
 	"net/http"
 
