@@ -22,3 +22,15 @@ func GetAllChains() (*[]models.Chain, error) {
 
 	return &chains, nil
 }
+
+func AddChain(chain *models.Chain) error {
+	coll := db.Client.Database("sys").Collection("chains")
+	ctx, cancel := db.Timeout()
+	defer cancel()
+
+	_, err := coll.InsertOne(ctx, chain)
+	if err != nil {
+		return err
+	}
+	return nil
+}

@@ -5,6 +5,7 @@ import {getAllChains} from '../../services/api/chains';
 import Button from '../../components/button';
 import Modal from '../../components/modal';
 import Card from '../../components/card';
+import NewChain from './newChain';
 
 export default class Chains extends scope(LitElement) {
 	@state() chains?: any[];
@@ -25,11 +26,7 @@ export default class Chains extends scope(LitElement) {
 			<div>
 				${this.newModal ? html`
 					<modal-el @close=${this.toggleModal}>
-						<card-el header footer>
-							<div class="header" slot="header">Register New Chain</div>
-							<div class="createBody">Create me</div>
-							<div class="footer" slot="footer">foooo</div>
-						</card-el>
+						<new-chain></new-chain>
 					</modal-el>
 				` : ''}
 
@@ -70,6 +67,7 @@ export default class Chains extends scope(LitElement) {
 			'button-el': Button,
 			'modal-el': Modal,
 			'card-el': Card,
+			'new-chain': NewChain,
 		};
 	}
 }

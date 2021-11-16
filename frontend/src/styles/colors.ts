@@ -6,6 +6,8 @@ export const colors = css`
     --accent2: #47E9B2;
     --bg: #192b3b;
     --diag: #273644;
-    color: #dadada
+    --white: #dadada;
+    --field: rgb(20 32 44);
+    color: var(--white);
   }
 `;
