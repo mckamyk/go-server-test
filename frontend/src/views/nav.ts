@@ -60,10 +60,5 @@ export default class Nav extends connect(store)(scope(LitElement)) {
 		.route.active {
 			background: var(--accent);
 		}
-		button {
-			width: 100%;
-			display: block;
-			height: 10rem;
-		}
 	`;
 }
